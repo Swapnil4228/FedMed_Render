@@ -11,6 +11,7 @@ from io import BytesIO
 
 from model import ChestNet
 from auth import router as auth_router
+from models import User            # ✅ IMPORTANT ADDITION
 from database import Base, engine
 
 app = FastAPI()
