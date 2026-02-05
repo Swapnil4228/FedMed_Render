@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+# bcrypt has a 72-byte password limit
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -20,12 +21,16 @@ class UserLogin(BaseModel):
     password: str
 
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    # ✅ FIX: truncate password safely to bcrypt limit
+    safe_password = password.encode("utf-8")[:72]
+    return pwd_context.hash(safe_password)
 
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # ✅ FIX: same truncation during verification
+    safe_password = plain_password.encode("utf-8")[:72]
+    return pwd_context.verify(safe_password, hashed_password)
 
 
 @router.post("/signup")
@@ -57,8 +62,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    return {"message": "Login successful", "email": db_user.email}
-
-
-def get_current_user():
-    return "demo_user"
+    return {
+        "message": "Login successful",
+        "email": db_user.email
+    }
