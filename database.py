@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "sqlite:////opt/render/project/src/fedmed.db"
+# ✅ Render writable path
+DATABASE_URL = "sqlite:////tmp/fedmed.db"
 
 engine = create_engine(
     DATABASE_URL,
