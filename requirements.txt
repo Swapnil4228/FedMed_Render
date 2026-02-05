@@ -6,5 +6,4 @@ pillow
 python-multipart
 sqlalchemy
 passlib
-bcrypt
 flwr

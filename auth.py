@@ -7,8 +7,11 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
-# bcrypt has a 72-byte password limit
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ✅ FIX: Use PBKDF2 instead of bcrypt (Render + Python 3.13 safe)
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto"
+)
 
 
 class UserCreate(BaseModel):
@@ -22,15 +25,11 @@ class UserLogin(BaseModel):
 
 
 def get_password_hash(password: str) -> str:
-    # ✅ FIX: truncate password safely to bcrypt limit
-    safe_password = password.encode("utf-8")[:72]
-    return pwd_context.hash(safe_password)
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # ✅ FIX: same truncation during verification
-    safe_password = plain_password.encode("utf-8")[:72]
-    return pwd_context.verify(safe_password, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 @router.post("/signup")
